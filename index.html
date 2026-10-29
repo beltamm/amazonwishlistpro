@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>⚡ Amazon Wishlist Pro v7</title>
+<title>⚡ Amazon Wishlist Pro v8</title>
 <style>
   :root {
     color-scheme: dark;
@@ -67,7 +67,7 @@
 </head>
 <body>
 <main>
-  <h1>Wishlist Pro <small>v7</small></h1>
+  <h1>Wishlist Pro <small>v8</small></h1>
   <p>Filtra, ordena e organiza sua Lista de Desejos da Amazon: desconto real, frete, formato (físico ou Kindle), tags automáticas por tema e exportação.</p>
 
   <section class="install" aria-labelledby="inst">
@@ -89,10 +89,10 @@
   <h2>No celular ou sem arrastar</h2>
   <p>Crie um favorito qualquer, edite o endereço dele e cole o código copiado no botão acima.</p>
 
-  <h2>O que mudou na v7</h2>
+  <h2>O que mudou na v8</h2>
   <ul>
     <li><strong>Tags automáticas funcionando.</strong> As regras da v6 nunca casavam; agora ignoram acentos e aceitam prefixos.</li>
-    <li><strong>Carregamento incremental.</strong> Novos itens são lidos assim que aparecem, sem esperas fixas.</li>
+    <li><strong>Carregamento automático.</strong> Ao abrir, a página rola sozinha até carregar a lista inteira, e novos itens são lidos assim que aparecem.</li>
     <li><strong>Painel isolado</strong> do CSS da Amazon e com preferências salvas entre visitas.</li>
     <li><strong>Busca sem acento</strong>, com vários termos e exclusão (<code>-kindle</code>).</li>
     <li><strong>Filtros novos:</strong> nota mínima, ordenação por maior preço e título, modo sem imagens.</li>
@@ -119,7 +119,7 @@ function wishlistPro() {
   'use strict';
   if (window.__wlp) { window.__wlp.toggle(); return; }
 
-  const VERSION = '7.0';
+  const VERSION = '8';
   const K_TAGS = 'amz_wl_custom_tags_v3';
   const K_TAGS_OLD = 'amz_wl_custom_tags_v2';
   const K_PREFS = 'amz_wl_prefs_v7';
@@ -179,7 +179,7 @@ function wishlistPro() {
   const cmp = (x, y) => (x === y ? 0 : (x < y ? -1 : 1));
 
   /* ---------- Preferências e tags do usuário ---------- */
-  const defaults = { sort: 'smart', disc: 0, fmt: 'no-digital', rate: 0, max: '', free: false, stock: true, compact: true, noimg: false, thr: '', min: false };
+  const defaults = { sort: 'smart', disc: 0, fmt: 'no-digital', rate: 0, max: '', free: false, stock: true, compact: true, noimg: false, thr: '', min: false, auto: true };
   const prefs = Object.assign({}, defaults, store.get(K_PREFS, {}));
   const savePrefs = () => store.set(K_PREFS, prefs);
 
@@ -300,6 +300,7 @@ function wishlistPro() {
           <label class="chk"><input id="stock" type="checkbox"> 📦 Só em estoque</label>
           <label class="chk"><input id="compact" type="checkbox"> Compacto</label>
           <label class="chk"><input id="noimg" type="checkbox"> Sem imagens</label>
+          <label class="chk" title="Rola a página sozinho até carregar a lista inteira"><input id="auto" type="checkbox"> Carregar tudo ao abrir</label>
           <button id="reset" type="button" class="ghost">Limpar filtros</button>
         </div>
         <div id="tags" class="row tags" role="group" aria-label="Filtrar por tag"></div>
@@ -315,7 +316,7 @@ function wishlistPro() {
       </div>
     </div>`;
   const ui = {};
-  ['q', 'sort', 'count', 'min', 'close', 'body', 'disc', 'fmt', 'rate', 'max', 'free', 'stock', 'compact', 'noimg', 'reset', 'tags', 'load', 'stats', 'thr', 'tagvis', 'copy', 'csv']
+  ['q', 'sort', 'count', 'min', 'close', 'body', 'disc', 'fmt', 'rate', 'max', 'free', 'stock', 'compact', 'noimg', 'auto', 'reset', 'tags', 'load', 'stats', 'thr', 'tagvis', 'copy', 'csv']
     .forEach(id => { ui[id] = root.getElementById(id); });
   ['keydown', 'keyup', 'keypress'].forEach(ev => host.addEventListener(ev, e => e.stopPropagation()));
   (document.querySelector('#wl-item-view') || document.body).prepend(host);
@@ -494,11 +495,6 @@ function wishlistPro() {
 
   /* ---------- Varredura ---------- */
   function scan() {
-    items = items.filter(i => {
-      if (i.li.isConnected) return true;
-      proc.delete(i.itemId); byLi.delete(i.li);
-      return false;
-    });
     document.querySelectorAll('li[data-itemid]').forEach(li => {
       const id = li.getAttribute('data-itemid');
       if (!id || proc.has(id)) return;
@@ -547,7 +543,7 @@ function wishlistPro() {
     if (!parent) return;
     const fn = SORTS[prefs.sort] || SORTS.smart;
     const frag = document.createDocumentFragment();
-    [...items].sort((a, b) => fn(a, b) || cmp(a.seq, b.seq)).forEach(i => frag.appendChild(i.li));
+    [...items].filter(i => i.li.isConnected).sort((a, b) => fn(a, b) || cmp(a.seq, b.seq)).forEach(i => frag.appendChild(i.li));
     parent.appendChild(frag);
   }
 
@@ -593,26 +589,36 @@ function wishlistPro() {
 
   /* ---------- Carregar tudo ---------- */
   const ended = () => { const m = document.querySelector('#endOfListMarker'); return !!(m && m.offsetParent !== null); };
+  const domCount = () => document.querySelectorAll('li[data-itemid]').length;
+  async function nudge() {
+    const all = document.querySelectorAll('li[data-itemid]');
+    window.scrollBy(0, -400);
+    await new Promise(r => setTimeout(r, 80));
+    if (all.length) all[all.length - 1].scrollIntoView({ block: 'end' });
+    window.scrollTo(0, document.documentElement.scrollHeight);
+    window.dispatchEvent(new Event('scroll'));
+  }
   async function loadAll() {
     if (loading) { loading = false; return; }
     loading = true;
     ui.load.className = 'primary stop';
     applyFilters();
-    let stale = 0;
-    while (loading && stale < 3) {
+    let stale = 0, reason = '';
+    while (loading) {
       ui.load.textContent = '⏳ ' + items.length + ' itens… (parar)';
-      window.scrollTo(0, document.documentElement.scrollHeight);
-      const n0 = document.querySelectorAll('li[data-itemid]').length;
-      await waitFor(() => document.querySelectorAll('li[data-itemid]').length !== n0 || ended(), 2500);
+      ui.count.textContent = items.length + ' carregados';
+      const n0 = domCount();
+      await nudge();
+      await waitFor(() => domCount() !== n0 || ended(), 4000);
       scan();
-      ui.count.textContent = items.length + ' itens';
-      if (ended()) break;
-      stale = document.querySelectorAll('li[data-itemid]').length === n0 ? stale + 1 : 0;
+      if (ended()) { reason = 'fim'; break; }
+      if (domCount() === n0) { if (++stale >= 5) { reason = 'travou'; break; } } else stale = 0;
     }
     loading = false;
     window.scrollTo(0, 0);
-    ui.load.className = 'primary done';
-    ui.load.textContent = '✅ ' + items.length + ' itens carregados';
+    if (reason === 'fim') { ui.load.className = 'primary done'; ui.load.textContent = '✅ ' + items.length + ' itens carregados'; }
+    else if (reason === 'travou') { ui.load.className = 'primary'; ui.load.textContent = '⚠️ Parou em ' + items.length + ' (sem novos itens). Continuar'; }
+    else { ui.load.className = 'primary'; ui.load.textContent = '⏬ Continuar (' + items.length + ' itens)'; }
     refreshTags(); sortDOM(); applyFilters();
   }
 
@@ -680,6 +686,7 @@ function wishlistPro() {
     ui.stock.checked = prefs.stock;
     ui.compact.checked = prefs.compact;
     ui.noimg.checked = prefs.noimg;
+    ui.auto.checked = prefs.auto;
     ui.body.hidden = prefs.min;
     ui.min.textContent = prefs.min ? '▢' : '–';
   }
@@ -700,6 +707,7 @@ function wishlistPro() {
   ui.stock.onchange = () => { prefs.stock = ui.stock.checked; savePrefs(); applyFilters(); };
   ui.compact.onchange = () => { prefs.compact = ui.compact.checked; savePrefs(); applyCompact(); };
   ui.noimg.onchange = () => { prefs.noimg = ui.noimg.checked; savePrefs(); applyCompact(); };
+  ui.auto.onchange = () => { prefs.auto = ui.auto.checked; savePrefs(); };
   ui.reset.onclick = () => {
     Object.assign(prefs, { disc: 0, fmt: 'all', rate: 0, max: '', free: false, stock: true });
     activeTag = 'ALL';
@@ -772,6 +780,7 @@ function wishlistPro() {
   refreshTags();
   sortDOM();
   applyFilters();
+  if (prefs.auto && !ended()) loadAll();
 }
 
 /* ============================================================
