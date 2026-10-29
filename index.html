@@ -1,302 +1,820 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>⚡ Amazon Wishlist Pro v6</title>
-  <style>
-    body {
-      background: #0d0d0d; color: #f5f5f5; font-family: monospace;
-      display: flex; justify-content: center; align-items: center;
-      min-height: 100vh; margin: 0; padding: 24px; box-sizing: border-box;
-    }
-    .card {
-      max-width: 600px; width: 100%; background: #141414; border: 2px solid #ff6600;
-      padding: 36px; border-radius: 8px; box-shadow: 0 12px 40px rgba(0,0,0,0.8);
-      box-sizing: border-box;
-    }
-    h1 { color: #ff6600; margin-top: 0; font-size: 24px; }
-    p { line-height: 1.6; color: #ccc; font-size: 14px; }
-    .drag-box {
-      margin: 32px 0; padding: 28px 20px; background: #1a1a1a;
-      border: 2px dashed #444; text-align: center; border-radius: 6px;
-    }
-    .bookmarklet-btn {
-      display: inline-block; background: #ff6600; color: #000;
-      font-weight: bold; font-size: 16px; padding: 14px 28px;
-      text-decoration: none; border-radius: 6px; cursor: grab;
-      box-shadow: 0 4px 15px rgba(255,102,0,0.4); border: 2px solid #fff;
-      margin-top: 14px;
-    }
-    .bookmarklet-btn:active { cursor: grabbing; }
-    .steps { 
-      background: #1a1a1a; padding: 18px 20px 18px 36px; 
-      border-left: 3px solid #00b4d8; font-size: 13px; 
-      border-radius: 0 6px 6px 0; margin: 0; box-sizing: border-box;
-    }
-    .steps li { margin-bottom: 10px; line-height: 1.5; }
-    .steps li:last-child { margin-bottom: 0; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>⚡ Amazon Wishlist Pro v7</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0e0f11;
+    --card: #16181b;
+    --line: #2b2e33;
+    --text: #ececec;
+    --muted: #a0a6ad;
+    --accent: #ff6a00;
+    --accent-ink: #1a0d00;
+    --blue: #38bdf8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 32px 16px 56px; background: var(--bg); color: var(--text);
+    font: 15px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 680px; margin: 0 auto; }
+  h1 { margin: 0 0 6px; font-size: 30px; line-height: 1.15; letter-spacing: -0.02em; }
+  h1 small { font-size: 14px; font-weight: 500; color: var(--muted); margin-left: 6px; letter-spacing: 0; }
+  h2 { margin: 36px 0 10px; font-size: 17px; }
+  p { margin: 0 0 12px; color: var(--muted); max-width: 62ch; }
+  .install {
+    margin: 28px 0 0; padding: 24px; background: var(--card);
+    border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 10px;
+  }
+  .install p { color: var(--text); margin-bottom: 16px; }
+  .bm {
+    display: inline-block; padding: 12px 22px; border-radius: 8px; cursor: grab;
+    background: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: 16px;
+    text-decoration: none; border: 2px solid #fff3;
+    box-shadow: 0 6px 20px rgba(255,106,0,.28);
+  }
+  .bm:active { cursor: grabbing; }
+  .bm:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+  .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 16px; }
+  button {
+    font: inherit; font-size: 14px; color: var(--text); background: transparent; cursor: pointer;
+    border: 1px solid var(--line); border-radius: 6px; padding: 7px 12px;
+  }
+  button:hover { border-color: var(--accent); }
+  .meta { font-size: 13px; color: var(--muted); }
+  ol, ul { margin: 0; padding-left: 22px; color: var(--muted); }
+  li { margin-bottom: 8px; padding-left: 4px; }
+  li strong { color: var(--text); font-weight: 600; }
+  details { margin-top: 28px; border-top: 1px solid var(--line); padding-top: 14px; }
+  summary { cursor: pointer; color: var(--text); font-weight: 600; }
+  pre {
+    margin: 12px 0 0; padding: 14px; max-height: 420px; overflow: auto; background: #0a0b0c;
+    border: 1px solid var(--line); border-radius: 8px; font-size: 12px; line-height: 1.5; color: #c9d1d9;
+    tab-size: 2;
+  }
+  #toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); opacity: 0;
+    background: #fff; color: #111; padding: 10px 16px; border-radius: 8px; font-size: 14px;
+    pointer-events: none; transition: opacity .2s, transform .2s; max-width: 90vw;
+  }
+  #toast.on { opacity: 1; transform: translate(-50%, 0); }
+  @media (prefers-reduced-motion: reduce) { #toast { transition: none; } }
+</style>
 </head>
 <body>
-  <div class="card">
-    <h1>⚡ Amazon Wishlist Pro v6</h1>
-    <p>Superfiltro definitivo para Listas de Desejos: detecção avançada por editoras e autores, filtro de frete grátis, ordenação por % de desconto real e tagueamento inteligente.</p>
-    
-    <div class="drag-box">
-      <p style="margin-top:0; color:#ff9e00; font-weight:bold;">👇 ARRASTE ESTE BOTÃO PARA SUA BARRA DE FAVORITOS 👇</p>
-      <a id="bm-link" class="bookmarklet-btn" href="#">⚡ Wishlist Pro v6</a>
+<main>
+  <h1>Wishlist Pro <small>v7</small></h1>
+  <p>Filtra, ordena e organiza sua Lista de Desejos da Amazon: desconto real, frete, formato (físico ou Kindle), tags automáticas por tema e exportação.</p>
+
+  <section class="install" aria-labelledby="inst">
+    <p id="inst"><strong>Arraste o botão laranja para a barra de favoritos.</strong></p>
+    <a id="bm" class="bm" href="#" draggable="true">⚡ Wishlist Pro</a>
+    <div class="row">
+      <button id="copy" type="button">Copiar código do bookmarklet</button>
+      <span class="meta" id="size"></span>
     </div>
+  </section>
 
-    <ol class="steps">
-      <li>Ative a barra de favoritos do navegador (<strong>Ctrl + Shift + B</strong> ou <strong>Cmd + Shift + B</strong>).</li>
-      <li>Segure e <strong>arraste o botão laranja acima</strong> até soltar na sua barra de favoritos.</li>
-      <li>Abra qualquer Lista de Desejos da Amazon e clique no favorito <strong>⚡ Wishlist Pro v6</strong>!</li>
-    </ol>
-  </div>
+  <h2>Como instalar</h2>
+  <ol>
+    <li>Mostre a barra de favoritos (<strong>Ctrl+Shift+B</strong> ou <strong>Cmd+Shift+B</strong>).</li>
+    <li>Arraste o botão laranja até a barra.</li>
+    <li>Abra uma Lista de Desejos da Amazon e clique no favorito. Clique de novo para minimizar ou expandir o painel.</li>
+  </ol>
 
-  <script>
-    const bookmarkletCode = `javascript:(function(){
-      const P=document.getElementById('custom-wl-filter');
-      if(P){P.style.display=P.style.display==='none'?'flex':'none';return;}
-      document.getElementById('wl-turbo-css')?.remove();
-      const S=document.createElement('style');
-      S.id='wl-turbo-css';
-      S.textContent='#g-items li[data-itemid]{content-visibility:auto;contain-intrinsic-size:120px}body.wl-compact #g-items li[data-itemid] img{width:48px!important;height:48px!important;max-width:48px!important;object-fit:contain!important}body.wl-compact #g-items li[data-itemid]{padding:6px 0!important;margin-bottom:4px!important}body.wl-no-img #g-items li[data-itemid] img{display:none!important}';
-      document.head.appendChild(S);
-      document.body.classList.add('wl-compact');
+  <h2>No celular ou sem arrastar</h2>
+  <p>Crie um favorito qualquer, edite o endereço dele e cole o código copiado no botão acima.</p>
 
-      const K='amz_wl_custom_tags_v2', saved=JSON.parse(localStorage.getItem(K)||'{}'), save=()=>localStorage.setItem(K,JSON.stringify(saved));
-      
-      // Dicionário Expandido (Termos + Editoras + Autores)
-      const RULES={
-        '🎲 RPG': /\\b(rpg|cthulhu|d&d|dungeons|pathfinder|mörk borg|kult|gurps|vampiro|lobisomem|tormenta|ordem paranormal|coriolis|lancer|dragonbane|blades in the dark|apocalypse|pbta|osr|livro básico|suplemento|escudo do mestre|dados|d20|free league|new order|retropunk|buró|jambô|galápagos|devir)\b/i,
-        '🕹️ Game Design & Narrativa': /\\b(game design|level design|narrativ|storytelling|worldbuilding|ludolog|jogos|game|procedural|interactive|roteiro|escrita|escrever|jornada do herói|mitologia|gamedev)\b/i,
-        '🎨 Design & Arte': /\\b(ux|ui|design|tipografia|grid|layout|brutalis|ilustra|arte|artbook|concept art|aquarela|pintura|colorir|bobbie goods|arquitetura|bauhaus|pantone)\b/i,
-        '🐙 Terror & Weird': /\\b(terror|horror|lovecraft|king|stephen king|poe|blackwater|junji ito|medo|assombra|macabr|gótico|ocult|weird|pesadelo|corte|cadáver|darkside|summus|monstro|zumbi)\b/i,
-        '🚀 Sci-Fi & Cyberpunk': /\\b(sci-fi|ficção científica|cyberpunk|steampunk|duna|asimov|gibson|philip k\\. dick|distopia|espacial|androide|robô|futuro|aleph|arqueiro|vr)\b/i,
-        '💬 HQ & Mangá': /\\b(hq|quadrinhos|graphic novel|mangá|manga|omnibus|volume|vol\\.|ed\\.|panini|pipoca e nanquim|conrad|darkside graphic|vertigo|sandman|akira|gundam|junji ito|mauricio de sousa|toon)\b/i,
-        '🎲 Board Game & Mini': /\\b(board game|jogo de tabuleiro|card game|meeple|miniatura|gunpla|bandai|model kit|acrílica|tinta|pincel|vallejo|citadel|warhammer)\b/i
-      };
+  <h2>O que mudou na v7</h2>
+  <ul>
+    <li><strong>Tags automáticas funcionando.</strong> As regras da v6 nunca casavam; agora ignoram acentos e aceitam prefixos.</li>
+    <li><strong>Carregamento incremental.</strong> Novos itens são lidos assim que aparecem, sem esperas fixas.</li>
+    <li><strong>Painel isolado</strong> do CSS da Amazon e com preferências salvas entre visitas.</li>
+    <li><strong>Busca sem acento</strong>, com vários termos e exclusão (<code>-kindle</code>).</li>
+    <li><strong>Filtros novos:</strong> nota mínima, ordenação por maior preço e título, modo sem imagens.</li>
+    <li><strong>Resumo dos visíveis:</strong> total, economia e quanto falta para a meta de frete grátis.</li>
+    <li><strong>Tag em lote</strong> nos itens visíveis e remoção de tags automáticas que persiste.</li>
+    <li><strong>Exportar</strong> em Markdown com links ou CSV para Excel.</li>
+    <li><strong>Fechar</strong> restaura a página como estava.</li>
+  </ul>
 
-      const listC=document.querySelector('#g-items')||document.querySelector('ul.a-unordered-list.a-nostyle.a-vertical');
-      let items=[], proc=new Set(), activeTag='ALL';
+  <details>
+    <summary>Ver código-fonte do bookmarklet</summary>
+    <pre id="src"></pre>
+  </details>
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
 
-      function renderBadges(it){
-        it.li.querySelector('.wl-custom-badges')?.remove();
-        const b=document.createElement('div');
-        b.className='wl-custom-badges';
-        b.style.cssText='margin-top:6px;display:flex;flex-wrap:wrap;gap:5px;align-items:center;font-family:monospace;font-size:11px;';
-        
-        const fc={fisico:{bg:'#1b4332',t:'#74c69d',l:'📖 FÍSICO'},digital:{bg:'#3c096c',t:'#e0aaff',l:'📱 KINDLE'},outro:{bg:'#343a40',t:'#adb5bd',l:'📦 OUTRO'}}[it.format];
-        let h='<span style="background:'+fc.bg+';color:'+fc.t+';padding:2px 6px;border-radius:4px;font-weight:bold;">'+fc.l+'</span>';
-        
-        if(it.isFreeShipping)h+='<span style="background:#003566;color:#00b4d8;border:1px solid #0077b6;padding:2px 6px;border-radius:4px;font-weight:bold;">🚚 FRETE GRÁTIS</span>';
-        else if(it.shippingCost>0)h+='<span style="background:#370617;color:#ffba08;padding:2px 6px;border-radius:4px;">+R$ '+it.shippingCost.toFixed(2)+' frete</span>';
-        
-        if(it.discountPct>0){
-          const hc=it.discountPct>=40?'#ff0055':'#6a040f';
-          h+='<span style="background:'+hc+';color:#fff;border:1px solid #ff4d6d;padding:2px 6px;border-radius:4px;font-weight:bold;">🔥 -'+it.discountPct+'% (-R$ '+it.discountBRL.toFixed(2)+')</span>';
-        }
-        b.innerHTML=h;
+<script>
+/* ============================================================
+   BOOKMARKLET. Escrito como função normal e convertido em
+   javascript: no final do arquivo. Não use "//" no fim de
+   linhas que tenham código; linhas só de comentário são removidas.
+   ============================================================ */
+function wishlistPro() {
+  'use strict';
+  if (window.__wlp) { window.__wlp.toggle(); return; }
 
-        it.tags.forEach(t=>{
-          const sp=document.createElement('span');
-          sp.style.cssText='background:#222;color:#ff9e00;border:1px solid #ff9e00;padding:2px 6px;border-radius:4px;cursor:pointer;';
-          sp.textContent=t+' ×';
-          sp.onclick=()=>{
-            it.tags=it.tags.filter(x=>x!==t);
-            it.searchCache=(it.title+' '+it.byline+' '+it.tags.join(' ')).toLowerCase();
-            saved[it.itemId]=it.tags; save(); renderBadges(it); refreshTags(); filterOnly();
-          };
-          b.appendChild(sp);
-        });
+  const VERSION = '7.0';
+  const K_TAGS = 'amz_wl_custom_tags_v3';
+  const K_TAGS_OLD = 'amz_wl_custom_tags_v2';
+  const K_PREFS = 'amz_wl_prefs_v7';
+  const W = { price: 0.6, pct: 2.5, brl: 0.8, free: 18, notFree: -15, rate: 3 };
 
-        const ab=document.createElement('button');
-        ab.textContent='+ Tag';
-        ab.style.cssText='background:#222;color:#ccc;border:1px dashed #666;padding:2px 6px;border-radius:4px;cursor:pointer;font-size:11px;';
-        ab.onclick=()=>{
-          const nt=prompt('Nova Tag (ex: Prioridade, RPG, Mestrado):');
-          if(nt&&nt.trim()){
-            const cl=nt.trim();
-            if(!it.tags.includes(cl))it.tags.push(cl);
-            it.searchCache=(it.title+' '+it.byline+' '+it.tags.join(' ')).toLowerCase();
-            saved[it.itemId]=it.tags; save(); renderBadges(it); refreshTags(); filterOnly();
-          }
-        };
-        b.appendChild(ab);
-        (it.li.querySelector('a[id^="itemName_"]')?.parentElement||it.li).appendChild(b);
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } }
+  };
+
+  //#helpers-start
+  const norm = s => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const parseBRL = s => {
+    const m = (s || '').replace(/\s/g, '').match(/(\d{1,3}(?:\.\d{3})*|\d+),(\d{2})/);
+    return m ? parseFloat(m[1].replace(/\./g, '') + '.' + m[2]) : NaN;
+  };
+  const brl = n => isFinite(n)
+    ? 'R$ ' + n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : '—';
+
+  /* Termos terminados em * casam por prefixo; os demais, palavra inteira.
+     Acentos e maiúsculas são ignorados. */
+  const RULES = {
+    '🎲 RPG': ['rpg*', 'cthulhu', 'd&d', 'dungeons*', 'pathfinder', 'mork borg', 'kult', 'gurps', 'vampiro', 'lobisomem', 'tormenta*', 'ordem paranormal', 'coriolis', 'lancer', 'dragonbane', 'blades in the dark', 'apocalypse world', 'pbta', 'osr', 'livro basico', 'escudo do mestre', 'd20', 'free league', 'new order', 'retropunk', 'buro', 'jambo', 'galapagos', 'devir'],
+    '🕹️ Game Design & Narrativa': ['game design', 'level design', 'narrativ*', 'storytelling', 'worldbuilding', 'ludolog*', 'game', 'games', 'jogos', 'procedural', 'interactive', 'roteiro*', 'escrita criativa', 'escrever', 'jornada do heroi', 'mitologia', 'gamedev'],
+    '🎨 Design & Arte': ['ux', 'ui', 'design*', 'tipografia', 'grid', 'layout', 'brutalis*', 'ilustra*', 'arte', 'artbook', 'concept art', 'aquarela', 'pintura', 'colorir', 'bobbie goods', 'arquitetura', 'bauhaus', 'pantone'],
+    '🐙 Terror & Weird': ['terror', 'horror', 'lovecraft*', 'stephen king', 'edgar allan poe', 'poe', 'blackwater', 'junji ito', 'medo', 'assombra*', 'macabr*', 'gotico', 'ocult*', 'weird', 'pesadelo*', 'cadaver*', 'darkside', 'monstro*', 'zumbi*'],
+    '🚀 Sci-Fi & Cyberpunk': ['sci-fi', 'ficcao cientifica', 'cyberpunk', 'steampunk', 'duna', 'asimov', 'gibson', 'philip k. dick', 'distopia*', 'espacial', 'androide*', 'robo*', 'futuro', 'aleph'],
+    '💬 HQ & Mangá': ['hq*', 'quadrinho*', 'graphic novel', 'manga', 'mangas', 'omnibus', 'panini', 'pipoca e nanquim', 'conrad', 'vertigo', 'sandman', 'akira', 'gundam', 'junji ito', 'mauricio de sousa', 'turma da monica', 'toon'],
+    '🧩 Board Game & Mini': ['board game', 'jogo de tabuleiro', 'card game', 'meeple', 'miniatura*', 'gunpla', 'bandai', 'model kit', 'tinta acrilica', 'tintas', 'pincel', 'vallejo', 'citadel', 'warhammer']
+  };
+  const COMPILED = Object.entries(RULES).map(([tag, terms]) => {
+    const alts = terms.map(t => {
+      const prefix = t.endsWith('*');
+      const body = esc(norm(prefix ? t.slice(0, -1) : t));
+      return prefix ? body : body + '(?![a-z0-9])';
+    });
+    return [tag, new RegExp('(?:^|[^a-z0-9])(?:' + alts.join('|') + ')')];
+  });
+  const autoTags = (title, byline) => {
+    const text = norm(title + ' | ' + byline);
+    return COMPILED.filter(([, rx]) => rx.test(text)).map(([tag]) => tag);
+  };
+  //#helpers-end
+
+  const el = (tag, cls, text) => {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  };
+  const waitFor = (fn, ms) => new Promise(res => {
+    const t0 = Date.now();
+    (function tick() { if (fn() || Date.now() - t0 > ms) return res(); setTimeout(tick, 120); })();
+  });
+  const cmp = (x, y) => (x === y ? 0 : (x < y ? -1 : 1));
+
+  /* ---------- Preferências e tags do usuário ---------- */
+  const defaults = { sort: 'smart', disc: 0, fmt: 'no-digital', rate: 0, max: '', free: false, stock: true, compact: true, noimg: false, thr: '', min: false };
+  const prefs = Object.assign({}, defaults, store.get(K_PREFS, {}));
+  const savePrefs = () => store.set(K_PREFS, prefs);
+
+  const userTags = store.get(K_TAGS, null) || (() => {
+    const old = store.get(K_TAGS_OLD, {}), m = {};
+    for (const id in old) if (Array.isArray(old[id])) m[id] = { add: old[id], del: [] };
+    return m;
+  })();
+  const tagState = id => userTags[id] || (userTags[id] = { add: [], del: [] });
+  const saveTags = () => store.set(K_TAGS, userTags);
+
+  /* ---------- CSS da página (selos nos itens) ---------- */
+  const css = el('style');
+  css.id = 'wlp-page-css';
+  css.textContent = `
+    #g-items li[data-itemid]{content-visibility:auto;contain-intrinsic-size:auto 120px}
+    body.wlp-compact #g-items li[data-itemid] img{width:48px!important;height:48px!important;max-width:48px!important;object-fit:contain!important}
+    body.wlp-compact #g-items li[data-itemid]{padding:6px 0!important;margin-bottom:4px!important}
+    body.wlp-noimg #g-items li[data-itemid] img{display:none!important}
+    li.wlp-hot{box-shadow:inset 3px 0 0 #e0003f}
+    .wlp-badges{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin:6px 0 2px;font:600 11px/1.2 system-ui,-apple-system,"Segoe UI",sans-serif}
+    .wlp-b{padding:3px 7px;border-radius:4px;white-space:nowrap}
+    .wlp-b--fis{background:#1b4332;color:#74c69d}
+    .wlp-b--dig{background:#3c096c;color:#e0aaff}
+    .wlp-b--out{background:#343a40;color:#adb5bd}
+    .wlp-b--oos{background:#4a1111;color:#ff9b9b}
+    .wlp-b--free{background:#003566;color:#7dd3fc;border:1px solid #0077b6}
+    .wlp-b--guess{background:#0b2540;color:#7aa7c7;border:1px dashed #0077b6}
+    .wlp-b--ship{background:#370617;color:#ffba08}
+    .wlp-b--off{background:#6a040f;color:#fff;border:1px solid #ff4d6d}
+    .wlp-b--hot{background:#e0003f}
+    .wlp-tag,.wlp-add{font:inherit;cursor:pointer;border-radius:4px;padding:3px 7px;background:#222;line-height:1.2}
+    .wlp-tag{color:#ffa040;border:1px solid #ffa040}
+    .wlp-tag:hover{background:#3a2a10}
+    .wlp-add{color:#ccc;border:1px dashed #777}
+    .wlp-add:hover{border-color:#ffa040;color:#ffa040}
+  `;
+  document.head.appendChild(css);
+
+  /* ---------- Painel (Shadow DOM: isolado do CSS da Amazon) ---------- */
+  const host = el('div');
+  host.id = 'custom-wl-filter';
+  const root = host.attachShadow({ mode: 'open' });
+  root.innerHTML = `
+    <style>
+      :host{all:initial;display:block;position:sticky;top:0;z-index:2147483000}
+      *{box-sizing:border-box}
+      .bar{--bg:#121316;--el:#1c1e22;--line:#2d3036;--tx:#ececec;--mut:#9ca3ab;--acc:#ff6a00;--acc2:#ffa040;--blue:#38bdf8;--pink:#ff3d71;
+        background:var(--bg);color:var(--tx);font:13px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+        border-bottom:2px solid var(--acc);box-shadow:0 10px 30px rgba(0,0,0,.45);
+        max-height:48vh;overflow:auto;padding:10px 14px;display:flex;flex-direction:column;gap:10px}
+      .body{display:flex;flex-direction:column;gap:10px}
+      .body[hidden]{display:none}
+      .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+      .brand{color:var(--acc);font-size:14px;white-space:nowrap}
+      .brand small{color:var(--mut);font-weight:400;margin-left:4px}
+      input,select,button{font:inherit;color:var(--tx);background:var(--el);border:1px solid var(--line);border-radius:6px;height:30px;padding:0 9px}
+      select,input{color-scheme:dark}
+      select{cursor:pointer;max-width:100%}
+      button{cursor:pointer}
+      button:hover{border-color:var(--acc)}
+      :is(input,select,button):focus-visible{outline:2px solid var(--acc2);outline-offset:1px}
+      button.primary{background:var(--blue);border-color:var(--blue);color:#04202b;font-weight:700}
+      button.primary.stop{background:var(--pink);border-color:var(--pink);color:#fff}
+      button.primary.done{background:#2fbf71;border-color:#2fbf71;color:#052012}
+      button.ghost{background:transparent}
+      #q{flex:1 1 200px;min-width:140px}
+      .grow{flex:1}
+      .count{color:var(--acc2);font-weight:700;white-space:nowrap}
+      .f{display:flex;align-items:center;gap:6px;color:var(--mut)}
+      .f input[type=number]{width:76px}
+      .chk{display:flex;align-items:center;gap:5px;cursor:pointer;user-select:none}
+      .chk input{width:15px;height:15px;padding:0;accent-color:var(--acc)}
+      .tags{flex-wrap:nowrap;overflow-x:auto;padding-bottom:3px;scrollbar-width:thin}
+      .chip{flex:none;height:26px;padding:0 10px;border-radius:13px;font-size:12px;white-space:nowrap}
+      .chip[aria-pressed=true]{background:var(--acc);border-color:var(--acc);color:#1a0d00;font-weight:700}
+      .stats{display:flex;flex-wrap:wrap;gap:4px 14px;color:var(--mut)}
+      .stats b{color:var(--tx);font-weight:600}
+    </style>
+    <div class="bar">
+      <div class="row">
+        <strong class="brand">⚡ Wishlist Pro<small>v${VERSION}</small></strong>
+        <input id="q" type="search" placeholder="Buscar… (-termo exclui)" aria-label="Buscar">
+        <select id="sort" aria-label="Ordenar por">
+          <option value="smart">🎯 Custo-benefício</option>
+          <option value="discount-pct">📉 Maior % de desconto</option>
+          <option value="discount-brl">💸 Maior R$ de desconto</option>
+          <option value="price-asc">💰 Menor preço</option>
+          <option value="price-desc">💎 Maior preço</option>
+          <option value="rating">⭐ Melhor avaliação</option>
+          <option value="title">🔤 Título (A–Z)</option>
+          <option value="original">📋 Ordem original</option>
+        </select>
+        <span id="count" class="count"></span>
+        <span class="grow"></span>
+        <button id="min" type="button" title="Minimizar / expandir">–</button>
+        <button id="close" type="button" title="Fechar e restaurar a página">✕</button>
+      </div>
+      <div id="body" class="body">
+        <div class="row">
+          <label class="f">Desconto
+            <select id="disc">
+              <option value="0">Todos</option><option value="10">≥ 10%</option><option value="20">≥ 20%</option>
+              <option value="30">≥ 30%</option><option value="40">≥ 40%</option><option value="50">≥ 50%</option><option value="60">≥ 60%</option>
+            </select>
+          </label>
+          <label class="f">Formato
+            <select id="fmt">
+              <option value="no-digital">Sem Kindle</option><option value="fisico">Só físicos</option>
+              <option value="digital">Só Kindle</option><option value="all">Todos</option>
+            </select>
+          </label>
+          <label class="f">Nota
+            <select id="rate"><option value="0">Todas</option><option value="4">≥ 4,0</option><option value="4.5">≥ 4,5</option></select>
+          </label>
+          <label class="f">Até R$ <input id="max" type="number" min="0" step="1" placeholder="sem limite"></label>
+          <label class="chk"><input id="free" type="checkbox"> 🚚 Frete grátis</label>
+          <label class="chk"><input id="stock" type="checkbox"> 📦 Só em estoque</label>
+          <label class="chk"><input id="compact" type="checkbox"> Compacto</label>
+          <label class="chk"><input id="noimg" type="checkbox"> Sem imagens</label>
+          <button id="reset" type="button" class="ghost">Limpar filtros</button>
+        </div>
+        <div id="tags" class="row tags" role="group" aria-label="Filtrar por tag"></div>
+        <div class="row">
+          <button id="load" type="button" class="primary">⏬ Carregar tudo</button>
+          <div id="stats" class="stats" aria-live="polite"></div>
+          <span class="grow"></span>
+          <label class="f" title="Mostra quanto falta para atingir o valor mínimo de frete grátis">Meta de frete R$ <input id="thr" type="number" min="0" step="1" placeholder="ex: 99"></label>
+          <button id="tagvis" type="button" title="Aplicar uma tag a todos os itens visíveis">🏷️ Tag nos visíveis</button>
+          <button id="copy" type="button" title="Copiar lista em Markdown">📋 Copiar</button>
+          <button id="csv" type="button" title="Baixar planilha CSV">⬇ CSV</button>
+        </div>
+      </div>
+    </div>`;
+  const ui = {};
+  ['q', 'sort', 'count', 'min', 'close', 'body', 'disc', 'fmt', 'rate', 'max', 'free', 'stock', 'compact', 'noimg', 'reset', 'tags', 'load', 'stats', 'thr', 'tagvis', 'copy', 'csv']
+    .forEach(id => { ui[id] = root.getElementById(id); });
+  ['keydown', 'keyup', 'keypress'].forEach(ev => host.addEventListener(ev, e => e.stopPropagation()));
+  (document.querySelector('#wl-item-view') || document.body).prepend(host);
+
+  /* ---------- Estado ---------- */
+  let items = [];
+  const proc = new Set();
+  const byLi = new Map();
+  let seq = 0;
+  let activeTag = 'ALL';
+  let loading = false;
+
+  /* ---------- Leitura de cada item ---------- */
+  function parseItem(li) {
+    const id = li.getAttribute('data-itemid');
+    const a = li.querySelector('a[id^="itemName_"]');
+    const title = (a && a.textContent.trim()) || 'Sem título';
+    const url = a ? a.href : '';
+    const byline = (li.querySelector('span[id^="item-byline-"]')?.textContent || '').replace(/\s+/g, ' ').trim();
+    const raw = (li.textContent || '').replace(/\s+/g, ' ');
+    const nb = norm(byline);
+
+    let format = 'outro';
+    if (/kindle|e-?book|edicao digital|formato digital/.test(nb) || /eBook Kindle/i.test(raw)) format = 'digital';
+    else if (/capa comum|capa dura|brochura|espiral|bolso|box|paginas|edicao|livro/.test(nb) || /capa comum|capa dura/i.test(raw)) format = 'fisico';
+
+    let price = parseFloat(li.getAttribute('data-price'));
+    if (!(price > 0 && isFinite(price))) price = parseBRL(li.querySelector('.a-price:not(.a-text-price) .a-offscreen')?.textContent);
+    const inStock = price > 0 && isFinite(price);
+
+    const prime = !!li.querySelector('.a-icon-prime');
+    const freeTxt = /frete gr[aá]tis|entrega gr[aá]tis/i.test(raw);
+    const sm = raw.match(/\+\s*R\$\s*([\d.]+,\d{2})\s*(?:de envio|de frete|frete|envio)/i);
+    const ship = sm ? parseBRL(sm[1]) : 0;
+    const freeShip = inStock && (prime || freeTxt);
+    const freeGuess = inStock && !freeShip && format === 'fisico' && ship === 0 && !/frete|envio/i.test(raw);
+    const eff = inStock ? price + ship : Infinity;
+
+    const dropTxt = li.querySelector('.itemPriceDrop, [id^="itemPriceDrop_"]')?.textContent || '';
+    const badgeTxt = li.querySelector('.a-badge-text, .savingsPercentage')?.textContent || '';
+    let pct = 0, brlOff = 0, discSrc = '';
+    const pcts = [...(dropTxt + ' ' + badgeTxt).matchAll(/(\d{1,2})\s*%/g)].map(m => +m[1]).filter(n => n > 0 && n <= 95);
+    if (pcts.length) { pct = Math.max(...pcts); discSrc = 'selo do item'; }
+    else {
+      const fm = raw.match(/(?:caiu|desconto de|economize|off)\s*(\d{1,2})\s*%|(\d{1,2})\s*%\s*(?:off|de desconto)/i);
+      const n = fm ? +(fm[1] || fm[2]) : 0;
+      if (n > 0 && n <= 95) { pct = n; discSrc = 'texto do item'; }
+    }
+    let old = parseBRL(li.querySelector('.a-text-price .a-offscreen')?.textContent);
+    if (!(old > 0)) {
+      const om = (dropTxt + ' ' + raw).match(/(?:Era|De|Pre[cç]o anterior)\s*:?\s*R\$\s*([\d.]+,\d{2})/i);
+      old = om ? parseBRL(om[1]) : NaN;
+    }
+    if (inStock && old > price) {
+      brlOff = old - price;
+      const c = Math.round(brlOff / old * 100);
+      if (c > pct && c <= 95) { pct = c; discSrc = 'preço de lista'; }
+    } else if (inStock && pct > 0) {
+      brlOff = price / (1 - pct / 100) - price;
+    }
+
+    const rm = (li.querySelector('i.a-icon-star span.a-icon-alt, .a-icon-star-small .a-icon-alt')?.textContent || '').match(/(\d+[,.]\d+)/);
+    const rating = rm ? parseFloat(rm[1].replace(',', '.')) : 0;
+    const reviews = parseInt((li.querySelector('a[id^="review_count_"]')?.textContent || '').replace(/\D/g, ''), 10) || 0;
+
+    const score = inStock
+      ? Math.max(0, 120 - eff) * W.price + pct * W.pct + brlOff * W.brl + (freeShip ? W.free : W.notFree)
+        + (rating >= 4.5 ? rating * Math.log10(reviews + 1) * W.rate : 0)
+      : -1e9;
+
+    const it = {
+      li, seq: seq++, itemId: id, title, byline, url, format, price, ship, eff, inStock,
+      freeShip, freeGuess, pct, brlOff, discSrc, rating, reviews, score,
+      auto: autoTags(title, byline), tags: [], cache: '', shown: true,
+      img: li.querySelector('img')
+    };
+    it.tags = computeTags(it);
+    it.cache = buildCache(it);
+    return it;
+  }
+
+  function computeTags(it) {
+    const s = userTags[it.itemId];
+    const del = new Set(s ? s.del : []);
+    return [...new Set([...it.auto.filter(t => !del.has(t)), ...(s ? s.add : [])])];
+  }
+  const buildCache = it => norm(it.title + ' ' + it.byline + ' ' + it.tags.join(' '));
+
+  function addTag(it, t) {
+    const s = tagState(it.itemId);
+    s.del = s.del.filter(x => x !== t);
+    if (!s.add.includes(t) && !it.auto.includes(t)) s.add.push(t);
+    retag(it);
+  }
+  function removeTag(it, t) {
+    const s = tagState(it.itemId);
+    s.add = s.add.filter(x => x !== t);
+    if (it.auto.includes(t) && !s.del.includes(t)) s.del.push(t);
+    retag(it);
+  }
+  function retag(it) {
+    it.tags = computeTags(it);
+    it.cache = buildCache(it);
+    saveTags();
+    renderBadges(it);
+  }
+  function afterTagChange() { refreshTags(); applyFilters(); }
+
+  function askTag(msg) {
+    const existing = [...new Set(items.flatMap(i => i.tags))].slice(0, 12).join(', ');
+    const t = prompt(msg + (existing ? '\nExistentes: ' + existing : ''), '');
+    return t && t.trim() ? t.trim().slice(0, 30) : null;
+  }
+
+  /* ---------- Imagens ---------- */
+  function shrinkImg(img, on) {
+    const d = img.dataset;
+    if (on) {
+      const cur = img.getAttribute('src') || '';
+      if (d.wlpOrig === undefined) { d.wlpOrig = cur; d.wlpSrcset = img.getAttribute('srcset') || ''; }
+      img.removeAttribute('srcset');
+      const n = cur.replace(/\._[^.]+_\./, '._SL75_.');
+      if (n !== cur) img.setAttribute('src', n);
+      d.wlpSet = img.getAttribute('src') || '';
+    } else if (d.wlpOrig !== undefined) {
+      if ((img.getAttribute('src') || '') === d.wlpSet) {
+        img.setAttribute('src', d.wlpOrig);
+        if (d.wlpSrcset) img.setAttribute('srcset', d.wlpSrcset);
       }
+      delete d.wlpOrig;
+    }
+  }
+  function applyCompact() {
+    document.body.classList.toggle('wlp-compact', prefs.compact);
+    document.body.classList.toggle('wlp-noimg', prefs.noimg);
+    items.forEach(it => { if (it.img) shrinkImg(it.img, prefs.compact); });
+  }
 
-      function scan(){
-        document.querySelectorAll('#g-items li[data-itemid], li[data-itemid]').forEach(li=>{
-          const id=li.getAttribute('data-itemid');
-          if(!id||proc.has(id))return;
-          proc.add(id);
+  /* ---------- Selos no item ---------- */
+  function renderBadges(it) {
+    it.li.querySelector('.wlp-badges')?.remove();
+    const box = el('div', 'wlp-badges');
+    const F = { fisico: ['fis', '📖 FÍSICO'], digital: ['dig', '📱 KINDLE'], outro: ['out', '📦 OUTRO'] }[it.format];
+    box.appendChild(el('span', 'wlp-b wlp-b--' + F[0], F[1]));
+    if (!it.inStock) box.appendChild(el('span', 'wlp-b wlp-b--oos', 'SEM ESTOQUE'));
+    if (it.freeShip) box.appendChild(el('span', 'wlp-b wlp-b--free', '🚚 FRETE GRÁTIS'));
+    else if (it.freeGuess) {
+      const g = el('span', 'wlp-b wlp-b--guess', '🚚 frete grátis?');
+      g.title = 'Estimado: o item não menciona frete.';
+      box.appendChild(g);
+    } else if (it.ship > 0) box.appendChild(el('span', 'wlp-b wlp-b--ship', '+' + brl(it.ship) + ' frete'));
+    if (it.pct > 0) {
+      const b = el('span', 'wlp-b wlp-b--off' + (it.pct >= 40 ? ' wlp-b--hot' : ''),
+        '🔥 -' + it.pct + '%' + (it.brlOff > 0 ? ' (-' + brl(it.brlOff) + ')' : ''));
+      b.title = 'Origem: ' + it.discSrc;
+      box.appendChild(b);
+    }
+    it.tags.forEach(t => {
+      const s = el('button', 'wlp-tag', t + ' ×');
+      s.type = 'button';
+      s.title = 'Remover tag';
+      s.onclick = e => { e.preventDefault(); e.stopPropagation(); removeTag(it, t); afterTagChange(); };
+      box.appendChild(s);
+    });
+    const ab = el('button', 'wlp-add', '+ Tag');
+    ab.type = 'button';
+    ab.onclick = e => {
+      e.preventDefault(); e.stopPropagation();
+      const t = askTag('Nova tag (ex: Prioridade, Mestrado):');
+      if (t) { addTag(it, t); afterTagChange(); }
+    };
+    box.appendChild(ab);
+    (it.li.querySelector('a[id^="itemName_"]')?.parentElement || it.li).appendChild(box);
+    it.li.classList.toggle('wlp-hot', it.pct >= 40);
+  }
 
-          const img=li.querySelector('img');
-          if(img){
-            img.removeAttribute('srcset'); img.loading='lazy'; img.decoding='async';
-            if(img.src&&img.src.includes('._'))img.src=img.src.replace(/\\._[^.]+_\\./,'._SL75_.');
-          }
+  /* ---------- Varredura ---------- */
+  function scan() {
+    items = items.filter(i => {
+      if (i.li.isConnected) return true;
+      proc.delete(i.itemId); byLi.delete(i.li);
+      return false;
+    });
+    document.querySelectorAll('li[data-itemid]').forEach(li => {
+      const id = li.getAttribute('data-itemid');
+      if (!id || proc.has(id)) return;
+      proc.add(id);
+      const it = parseItem(li);
+      if (it.img) { it.img.loading = 'lazy'; it.img.decoding = 'async'; if (prefs.compact) shrinkImg(it.img, true); }
+      renderBadges(it);
+      items.push(it);
+      byLi.set(li, it);
+    });
+  }
 
-          const tEl=li.querySelector('a[id^="itemName_"]'), title=tEl?tEl.textContent.trim():'Sem título';
-          const byline=li.querySelector('span[id^="item-byline-"]')?.textContent.trim()||'', raw=li.textContent||'';
+  /* ---------- Tags (barra) ---------- */
+  function refreshTags() {
+    const counts = {};
+    items.forEach(i => i.tags.forEach(t => { counts[t] = (counts[t] || 0) + 1; }));
+    if (activeTag !== 'ALL' && activeTag !== 'UNTAGGED' && !counts[activeTag]) activeTag = 'ALL';
+    ui.tags.textContent = '';
+    const mk = (label, val) => {
+      const b = el('button', 'chip', label);
+      b.type = 'button';
+      b.setAttribute('aria-pressed', String(activeTag === val));
+      b.onclick = () => { activeTag = val; refreshTags(); applyFilters(); };
+      ui.tags.appendChild(b);
+    };
+    mk('Todas (' + items.length + ')', 'ALL');
+    Object.entries(counts).sort((a, b) => b[1] - a[1]).forEach(([t, c]) => mk(t + ' (' + c + ')', t));
+    mk('Sem tag (' + items.filter(i => !i.tags.length).length + ')', 'UNTAGGED');
+  }
 
-          let format='outro';
-          if(/kindle|ebook|e-book|edição digital|formato digital/i.test(byline)||/eBook Kindle/i.test(raw))format='digital';
-          else if(/capa comum|capa dura|brochura|espiral|livro de bolso|box|livro|páginas|edição/i.test(byline)||/capa comum|capa dura/i.test(raw))format='fisico';
+  /* ---------- Ordenação ---------- */
+  const rscore = i => i.rating * Math.log10(i.reviews + 2);
+  const SORTS = {
+    smart: (a, b) => cmp(b.score, a.score),
+    'discount-pct': (a, b) => cmp(b.pct, a.pct) || cmp(a.eff, b.eff),
+    'discount-brl': (a, b) => cmp(b.brlOff, a.brlOff) || cmp(a.eff, b.eff),
+    'price-asc': (a, b) => cmp(a.eff, b.eff),
+    'price-desc': (a, b) => cmp(b.inStock ? b.eff : -1, a.inStock ? a.eff : -1),
+    rating: (a, b) => cmp(rscore(b), rscore(a)),
+    title: (a, b) => a.title.localeCompare(b.title, 'pt-BR'),
+    original: (a, b) => cmp(a.seq, b.seq)
+  };
+  function sortDOM() {
+    if (!items.length) return;
+    const parent = document.querySelector('#g-items') || items[0].li.parentElement;
+    if (!parent) return;
+    const fn = SORTS[prefs.sort] || SORTS.smart;
+    const frag = document.createDocumentFragment();
+    [...items].sort((a, b) => fn(a, b) || cmp(a.seq, b.seq)).forEach(i => frag.appendChild(i.li));
+    parent.appendChild(frag);
+  }
 
-          let rp=parseFloat(li.getAttribute('data-price'));
-          if(isNaN(rp)||rp<=0){
-            const pt=li.querySelector('.a-price .a-offscreen')?.textContent||'', m=pt.replace(/\\./g,'').match(/(\\d+,\\d+)/);
-            rp=m?parseFloat(m[1].replace(',','.')):Infinity;
-          }
-          const inStock=rp!==Infinity&&rp>0, prime=Boolean(li.querySelector('i.a-icon-prime, .a-icon-prime'));
-          const freeTxt=/frete gr[áa]tis|entrega gr[áa]tis/i.test(raw);
-          const sm=raw.match(/\\+\\s*R\\$\\s*(\\d+[,.]\\d+)\\s*(de envio|de frete)/i), sc=sm?parseFloat(sm[1].replace(',','.')):0;
-          const freeShip=inStock&&(prime||freeTxt||(format==='fisico'&&sc===0&&!/frete|envio/i.test(raw)));
-          const effP=inStock?(rp+sc):Infinity;
+  /* ---------- Filtros e resumo ---------- */
+  function applyFilters() {
+    const words = norm(ui.q.value).split(/\s+/).filter(Boolean);
+    const exc = words.filter(w => w[0] === '-' && w.length > 1).map(w => w.slice(1));
+    const inc = words.filter(w => w[0] !== '-');
+    const maxP = parseFloat(prefs.max) || Infinity;
+    let vis = 0, total = 0, saved = 0;
 
-          const dt=li.querySelector('.itemPriceDrop, [id^="itemPriceDrop_"]')?.textContent||'', bt=li.querySelector('.a-badge-text, .savingsPercentage')?.textContent||'';
-          let dPct=0, dBRL=0;
-          const pm=[...(dt+' '+bt+' '+raw).matchAll(/(\\d{1,2})\\s*%/g)];
-          if(pm.length>0){const ps=pm.map(m=>parseInt(m[1],10)).filter(n=>n>0&&n<=95);if(ps.length>0)dPct=Math.max(...ps);}
-          
-          const stm=(dt+' '+raw).replace(/\\./g,'').match(/(?:Era|De|Preço[^:]*):\\s*R\\$\\s*(\\d+,\\d+)/i);
-          if(stm&&inStock){
-            const op=parseFloat(stm[1].replace(',','.'));
-            if(op>rp){dBRL=op-rp; const cp=Math.round((dBRL/op)*100); if(cp>dPct&&cp<=95)dPct=cp;}
-          }else if(inStock&&dPct>0){const op=rp/(1-dPct/100); dBRL=op-rp;}
-
-          const st=li.querySelector('i.a-icon-star span.a-icon-alt')?.textContent||'', sM=st.match(/(\\d+[,.]\\d+)/), rating=sM?parseFloat(sM[1].replace(',','.')):0;
-          const rc=parseInt(li.querySelector('a[id^="review_count_"]')?.textContent.replace(/\\D/g,'')||'0',10)||0;
-
-          let score=-9999;
-          if(inStock){
-            score=Math.max(0,120-effP)*0.6+(dPct*2.5)+(dBRL*0.8)+(freeShip?18:-15)+(rating>=4.5?rating*Math.log10(rc+1)*3:0);
-          }
-
-          const aTags=[];
-          for(const[tn,rx]of Object.entries(RULES)){if(rx.test(title)||rx.test(byline)||rx.test(raw))aTags.push(tn);}
-          const tags=Array.from(new Set([...aTags,...(saved[id]||[])]));
-
-          const obj={
-            li, originalIndex:items.length, itemId:id, title, byline, format,
-            price:rp, shippingCost:sc, effectivePrice:effP, inStock, isFreeShipping:freeShip,
-            hasPrimeIcon:prime, discountPct:dPct, discountBRL:dBRL, rating, reviewCount:rc,
-            smartScore:score, tags, searchCache:(title+' '+byline+' '+tags.join(' ')).toLowerCase()
-          };
-          renderBadges(obj); items.push(obj);
-        });
+    for (const it of items) {
+      let show = true;
+      if (!loading) {
+        show = (!prefs.stock || it.inStock)
+          && it.eff <= maxP
+          && it.pct >= prefs.disc
+          && it.rating >= prefs.rate
+          && (!prefs.free || it.freeShip || it.freeGuess)
+          && (prefs.fmt === 'all' || (prefs.fmt === 'no-digital' ? it.format !== 'digital' : it.format === prefs.fmt))
+          && (activeTag === 'ALL' || (activeTag === 'UNTAGGED' ? !it.tags.length : it.tags.includes(activeTag)))
+          && inc.every(w => it.cache.includes(w))
+          && !exc.some(w => it.cache.includes(w));
       }
+      if (it.shown !== show) { it.li.style.display = show ? '' : 'none'; it.shown = show; }
+      if (show) { vis++; if (it.inStock) { total += it.eff; saved += it.brlOff; } }
+    }
+    ui.count.textContent = vis + '/' + items.length;
 
-      const pnl=document.createElement('div');
-      pnl.id='custom-wl-filter';
-      pnl.style.cssText='position:sticky;top:0;z-index:99999;background:#0d0d0d;color:#f5f5f5;padding:12px 16px;border-bottom:3px solid #ff6600;font-family:monospace;display:flex;flex-direction:column;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,0.85);';
-      pnl.innerHTML='<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;"><strong style="color:#ff6600;font-size:13px;">⚡ WISHLIST v6</strong><button id="wl-load-all" style="padding:5px 10px;background:#00b4d8;color:#000;font-weight:bold;border:none;border-radius:4px;cursor:pointer;">⏬ Carregar Tudo</button><input id="wl-search" type="text" placeholder="Buscar..." style="width:120px;padding:5px 8px;background:#1e1e1e;color:#fff;border:1px solid #444;border-radius:4px;"><select id="wl-sort" style="padding:5px 8px;background:#1e1e1e;color:#ff9e00;border:1px solid #ff6600;border-radius:4px;font-weight:bold;"><option value="smart">🎯 Custo-Benefício</option><option value="discount-pct">📉 Maior % Desconto</option><option value="discount-brl">💸 Maior R$ OFF</option><option value="effective-asc">💰 Menor Preço</option><option value="rating">⭐ Avaliação</option><option value="original">📋 Ordem Original</option></select><select id="wl-min-discount" style="padding:5px 8px;background:#2b0912;color:#ffccd5;border:1px solid #ff0055;border-radius:4px;font-weight:bold;"><option value="0">🔥 Desconto: Todos</option><option value="10">🔥 Mín 10% OFF</option><option value="20">🔥 Mín 20% OFF</option><option value="30">🔥 Mín 30% OFF</option><option value="40">🔥 Mín 40% OFF</option><option value="50">🔥 Mín 50% OFF</option><option value="60">🔥 Mín 60% OFF</option></select><select id="wl-format" style="padding:5px 8px;background:#1e1e1e;color:#74c69d;border:1px solid #444;border-radius:4px;font-weight:bold;"><option value="no-digital" selected>🚫 Só Físicos</option><option value="fisico">📖 Livros Físicos</option><option value="digital">📱 Só Kindle</option><option value="all">📚 Todos</option></select><label>Até R$: <input id="wl-max" type="number" placeholder="60" style="width:50px;padding:5px;background:#1e1e1e;color:#fff;border:1px solid #444;border-radius:4px;"></label><label style="cursor:pointer;color:#00b4d8;font-weight:bold;"><input id="wl-freeship" type="checkbox"> 🚚 Frete Grátis</label><label style="cursor:pointer;"><input id="wl-stock" type="checkbox" checked> 📦 Estoque</label><span id="wl-count" style="margin-left:auto;color:#ff9e00;font-weight:bold;"></span><button id="wl-copy" style="padding:5px 10px;background:#ff6600;color:#000;font-weight:bold;border:none;border-radius:4px;cursor:pointer;">📋 Exportar</button></div><div id="wl-tags-bar" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding-top:4px;border-top:1px solid #222;"></div>';
-      
-      (document.querySelector('#wl-item-view')||document.body).prepend(pnl);
+    ui.stats.textContent = '';
+    const add = (label, val) => {
+      const s = el('span');
+      s.append(label + ' ');
+      s.appendChild(el('b', null, val));
+      ui.stats.appendChild(s);
+    };
+    if (!items.length) { ui.stats.textContent = 'Nenhum item encontrado. Abra uma Lista de Desejos da Amazon.'; return; }
+    add('Total', brl(total));
+    if (saved > 0) add('Economia', brl(saved));
+    const thr = parseFloat(prefs.thr) || 0;
+    if (thr > 0 && total > 0) add('Frete grátis', total >= thr ? '✅ atingido' : 'faltam ' + brl(thr - total));
+  }
 
-      function refreshTags(){
-        const tb=document.getElementById('wl-tags-bar'), tc={};
-        items.forEach(i=>i.tags.forEach(t=>{tc[t]=(tc[t]||0)+1;}));
-        tb.innerHTML='<span style="color:#888;font-size:11px;margin-right:4px;">TAGS:</span>';
-        const mk=(lbl,val,cnt)=>{
-          const b=document.createElement('button'), act=activeTag===val;
-          b.textContent=cnt!==undefined?(lbl+' ('+cnt+')'):lbl;
-          b.style.cssText='padding:3px 9px;border-radius:4px;cursor:pointer;font-family:monospace;font-size:11px;background:'+(act?'#ff6600':'#1e1e1e')+';color:'+(act?'#000':'#ddd')+';border:1px solid '+(act?'#ff6600':'#444')+';font-weight:'+(act?'bold':'normal')+';';
-          b.onclick=()=>{activeTag=val; refreshTags(); filterOnly();};
-          tb.appendChild(b);
-        };
-        mk('Todas','ALL',items.length);
-        Object.entries(tc).sort((a,b)=>b[1]-a[1]).forEach(([t,c])=>mk(t,t,c));
-        mk('Sem Tag','UNTAGGED',items.filter(i=>i.tags.length===0).length);
-      }
+  /* ---------- Carregar tudo ---------- */
+  const ended = () => { const m = document.querySelector('#endOfListMarker'); return !!(m && m.offsetParent !== null); };
+  async function loadAll() {
+    if (loading) { loading = false; return; }
+    loading = true;
+    ui.load.className = 'primary stop';
+    applyFilters();
+    let stale = 0;
+    while (loading && stale < 3) {
+      ui.load.textContent = '⏳ ' + items.length + ' itens… (parar)';
+      window.scrollTo(0, document.documentElement.scrollHeight);
+      const n0 = document.querySelectorAll('li[data-itemid]').length;
+      await waitFor(() => document.querySelectorAll('li[data-itemid]').length !== n0 || ended(), 2500);
+      scan();
+      ui.count.textContent = items.length + ' itens';
+      if (ended()) break;
+      stale = document.querySelectorAll('li[data-itemid]').length === n0 ? stale + 1 : 0;
+    }
+    loading = false;
+    window.scrollTo(0, 0);
+    ui.load.className = 'primary done';
+    ui.load.textContent = '✅ ' + items.length + ' itens carregados';
+    refreshTags(); sortDOM(); applyFilters();
+  }
 
-      function sortDOM(){
-        if(!listC)return;
-        const m=document.getElementById('wl-sort').value;
-        const s=[...items].sort((a,b)=>{
-          if(m==='smart')return b.smartScore-a.smartScore;
-          if(m==='discount-pct')return(b.discountPct-a.discountPct)||(a.effectivePrice-b.effectivePrice);
-          if(m==='discount-brl')return(b.discountBRL-a.discountBRL)||(a.effectivePrice-b.effectivePrice);
-          if(m==='effective-asc')return a.effectivePrice-b.effectivePrice;
-          if(m==='rating')return(b.rating*Math.log10(b.reviewCount+2))-(a.rating*Math.log10(a.reviewCount+2));
-          return a.originalIndex-b.originalIndex;
-        });
-        const f=document.createDocumentFragment();
-        s.forEach(i=>f.appendChild(i.li));
-        listC.appendChild(f);
-      }
+  /* ---------- Exportação ---------- */
+  function visibleItems() {
+    return [...document.querySelectorAll('li[data-itemid]')].map(l => byLi.get(l)).filter(i => i && i.shown);
+  }
+  async function copyText(t) {
+    try { await navigator.clipboard.writeText(t); return true; }
+    catch (e) {
+      const ta = el('textarea');
+      ta.value = t;
+      ta.style.cssText = 'position:fixed;opacity:0';
+      document.body.appendChild(ta);
+      ta.select();
+      let ok = false;
+      try { ok = document.execCommand('copy'); } catch (_) { }
+      ta.remove();
+      return ok;
+    }
+  }
+  function flash(btn, msg) {
+    const old = btn.dataset.label || btn.textContent;
+    btn.dataset.label = old;
+    btn.textContent = msg;
+    setTimeout(() => { btn.textContent = old; }, 1800);
+  }
+  ui.copy.onclick = async () => {
+    const lines = visibleItems().map(i =>
+      '- [' + i.title.replace(/[\[\]]/g, '') + '](' + i.url + ') — ' + (i.inStock ? brl(i.eff) : 'sem estoque')
+      + (i.freeShip ? ' · frete grátis' : '')
+      + (i.pct ? ' · -' + i.pct + '%' : '')
+      + ' · ' + i.format
+      + (i.tags.length ? ' · ' + i.tags.join(', ') : ''));
+    flash(ui.copy, (await copyText(lines.join('\n'))) ? '✅ Copiado!' : '⚠️ Falhou');
+  };
+  ui.csv.onclick = () => {
+    const safe = v => { v = String(v); return /^[=+\-@]/.test(v) ? "'" + v : v; };
+    const n = x => (isFinite(x) ? x.toFixed(2).replace('.', ',') : '');
+    const rows = [['Título', 'Info', 'Formato', 'Preço', 'Frete', 'Preço efetivo', 'Desconto %', 'Desconto R$', 'Frete grátis', 'Nota', 'Avaliações', 'Tags', 'Link']];
+    visibleItems().forEach(i => rows.push([
+      safe(i.title), safe(i.byline), i.format, n(i.price), n(i.ship), n(i.eff), i.pct, n(i.brlOff),
+      i.freeShip ? 'sim' : (i.freeGuess ? 'talvez' : 'não'), i.rating || '', i.reviews, i.tags.join(' | '), i.url
+    ]));
+    const csv = '\ufeff' + rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(';')).join('\r\n');
+    const a = el('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = 'wishlist-' + new Date().toISOString().slice(0, 10) + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+    flash(ui.csv, '✅ Baixado');
+  };
 
-      function filterOnly(){
-        const q=document.getElementById('wl-search').value.toLowerCase().trim();
-        const md=parseInt(document.getElementById('wl-min-discount').value,10)||0;
-        const fmt=document.getElementById('wl-format').value;
-        const max=parseFloat(document.getElementById('wl-max').value)||Infinity;
-        const fs=document.getElementById('wl-freeship').checked;
-        const st=document.getElementById('wl-stock').checked;
+  /* ---------- Eventos do painel ---------- */
+  function syncUI() {
+    ui.sort.value = prefs.sort;
+    ui.disc.value = String(prefs.disc);
+    ui.fmt.value = prefs.fmt;
+    ui.rate.value = String(prefs.rate);
+    ui.max.value = prefs.max;
+    ui.thr.value = prefs.thr;
+    ui.free.checked = prefs.free;
+    ui.stock.checked = prefs.stock;
+    ui.compact.checked = prefs.compact;
+    ui.noimg.checked = prefs.noimg;
+    ui.body.hidden = prefs.min;
+    ui.min.textContent = prefs.min ? '▢' : '–';
+  }
+  let qTimer;
+  ui.q.oninput = () => { clearTimeout(qTimer); qTimer = setTimeout(applyFilters, 120); };
+  ui.q.onkeydown = e => { if (e.key === 'Escape') { ui.q.value = ''; applyFilters(); } };
+  ui.sort.onchange = () => { prefs.sort = ui.sort.value; savePrefs(); sortDOM(); applyFilters(); };
+  ui.disc.onchange = () => {
+    prefs.disc = +ui.disc.value;
+    if (prefs.disc >= 20 && prefs.sort === 'smart') { prefs.sort = 'discount-pct'; ui.sort.value = prefs.sort; sortDOM(); }
+    savePrefs(); applyFilters();
+  };
+  ui.fmt.onchange = () => { prefs.fmt = ui.fmt.value; savePrefs(); applyFilters(); };
+  ui.rate.onchange = () => { prefs.rate = +ui.rate.value; savePrefs(); applyFilters(); };
+  ui.max.oninput = () => { prefs.max = ui.max.value; savePrefs(); applyFilters(); };
+  ui.thr.oninput = () => { prefs.thr = ui.thr.value; savePrefs(); applyFilters(); };
+  ui.free.onchange = () => { prefs.free = ui.free.checked; savePrefs(); applyFilters(); };
+  ui.stock.onchange = () => { prefs.stock = ui.stock.checked; savePrefs(); applyFilters(); };
+  ui.compact.onchange = () => { prefs.compact = ui.compact.checked; savePrefs(); applyCompact(); };
+  ui.noimg.onchange = () => { prefs.noimg = ui.noimg.checked; savePrefs(); applyCompact(); };
+  ui.reset.onclick = () => {
+    Object.assign(prefs, { disc: 0, fmt: 'all', rate: 0, max: '', free: false, stock: true });
+    activeTag = 'ALL';
+    ui.q.value = '';
+    savePrefs(); syncUI(); refreshTags(); applyFilters();
+  };
+  ui.load.onclick = loadAll;
+  ui.tagvis.onclick = () => {
+    const list = visibleItems();
+    if (!list.length) return;
+    const t = askTag('Tag para os ' + list.length + ' itens visíveis:');
+    if (!t) return;
+    list.forEach(i => addTag(i, t));
+    afterTagChange();
+  };
+  ui.min.onclick = toggle;
+  ui.close.onclick = destroy;
 
-        let v=0;
-        for(let i=0;i<items.length;i++){
-          const it=items[i];
-          const sh=(!st||it.inStock)&&(it.effectivePrice<=max)&&(it.discountPct>=md)&&(!fs||it.isFreeShipping)&&
-                   (fmt==='all'||(fmt==='no-digital'?it.format!=='digital':it.format===fmt))&&
-                   (activeTag==='ALL'||(activeTag==='UNTAGGED'?it.tags.length===0:it.tags.includes(activeTag)))&&
-                   (!q||it.searchCache.includes(q));
-          const td=sh?'':'none';
-          if(it.li.style.display!==td)it.li.style.display=td;
-          if(sh)v++;
-        }
-        document.getElementById('wl-count').textContent=v+'/'+items.length;
-      }
+  function toggle() {
+    prefs.min = !prefs.min;
+    savePrefs(); syncUI();
+    if (!prefs.min) ui.q.focus();
+  }
 
-      let loading=false;
-      const lb=document.getElementById('wl-load-all');
-      lb.onclick=async()=>{
-        if(loading){loading=false; lb.textContent='⏬ Continuar'; lb.style.background='#00b4d8'; return;}
-        loading=true; lb.style.background='#ff0055'; lb.style.color='#fff';
-        items.forEach(i=>{i.li.style.display='';});
-        let lc=0, sr=0;
-        while(loading&&sr<3){
-          lb.textContent='⏳ ('+items.length+') [Parar]';
-          window.scrollTo(0,document.body.scrollHeight);
-          await new Promise(r=>setTimeout(r,750));
-          scan();
-          const em=document.querySelector('#endOfListMarker');
-          if(em&&em.offsetParent!==null)break;
-          if(items.length===lc)sr++; else{sr=0; lc=items.length;}
-        }
-        loading=false; window.scrollTo(0,0);
-        lb.textContent='✅ Total ('+items.length+')'; lb.style.background='#2b9348';
-        refreshTags(); sortDOM(); filterOnly();
-      };
+  /* ---------- Novos itens (rolagem infinita) ---------- */
+  const isNew = n => n.nodeType === 1 && (n.matches('li[data-itemid]')
+    ? !proc.has(n.getAttribute('data-itemid'))
+    : [...n.querySelectorAll('li[data-itemid]')].some(l => !proc.has(l.getAttribute('data-itemid'))));
+  let obsTimer;
+  const obs = new MutationObserver(muts => {
+    if (!muts.some(m => [...m.addedNodes].some(isNew))) return;
+    clearTimeout(obsTimer);
+    obsTimer = setTimeout(() => {
+      scan();
+      if (loading) { ui.count.textContent = items.length + ' itens'; return; }
+      refreshTags(); sortDOM(); applyFilters();
+    }, 200);
+  });
+  obs.observe(document.querySelector('#g-items') || document.body, { childList: true, subtree: true });
 
-      let tmr;
-      document.getElementById('wl-search').oninput=()=>{clearTimeout(tmr); tmr=setTimeout(filterOnly,100);};
-      document.getElementById('wl-sort').onchange=()=>{sortDOM(); filterOnly();};
-      document.getElementById('wl-min-discount').onchange=e=>{
-        if(parseInt(e.target.value,10)>=20&&document.getElementById('wl-sort').value==='smart'){
-          document.getElementById('wl-sort').value='discount-pct'; sortDOM();
-        }
-        filterOnly();
-      };
-      ['wl-format','wl-max','wl-freeship','wl-stock'].forEach(id=>document.getElementById(id).oninput=filterOnly);
+  /* ---------- Encerrar e restaurar a página ---------- */
+  function destroy() {
+    obs.disconnect();
+    clearTimeout(obsTimer); clearTimeout(qTimer);
+    loading = false;
+    const parent = items[0] && (document.querySelector('#g-items') || items[0].li.parentElement);
+    items.forEach(it => {
+      it.li.style.display = '';
+      it.li.classList.remove('wlp-hot');
+      it.li.querySelector('.wlp-badges')?.remove();
+      if (it.img) shrinkImg(it.img, false);
+    });
+    if (parent) {
+      const frag = document.createDocumentFragment();
+      [...items].sort((a, b) => a.seq - b.seq).forEach(i => frag.appendChild(i.li));
+      parent.appendChild(frag);
+    }
+    document.body.classList.remove('wlp-compact', 'wlp-noimg');
+    css.remove();
+    host.remove();
+    delete window.__wlp;
+  }
 
-      document.getElementById('wl-copy').onclick=()=>{
-        const vLis=Array.from(listC.querySelectorAll('li[data-itemid]')).filter(l=>l.style.display!=='none');
-        const txt=vLis.map(l=>{
-          const i=items.find(x=>x.li===l);
-          return'- ['+i.format.toUpperCase()+'] '+i.title+' | '+(i.inStock?'R$ '+i.effectivePrice.toFixed(2):'Sem estoque')+' '+(i.isFreeShipping?'(Frete Grátis)':'')+' '+(i.discountPct?'[-'+i.discountPct+'% / -R$ '+i.discountBRL.toFixed(2)+']':'')+' | Tags: '+(i.tags.join(', ')||'Sem Tag');
-        }).join('\\n');
-        navigator.clipboard.writeText(txt);
-        const b=document.getElementById('wl-copy'); b.textContent='✅ Copiado!'; setTimeout(()=>b.textContent='📋 Exportar',2000);
-      };
+  window.__wlp = { toggle, destroy, version: VERSION };
 
-      scan(); refreshTags(); sortDOM(); filterOnly();
-    })();`;
-    
-    document.getElementById('bm-link').setAttribute('href', bookmarkletCode);
-  </script>
+  /* ---------- Início ---------- */
+  syncUI();
+  scan();
+  applyCompact();
+  refreshTags();
+  sortDOM();
+  applyFilters();
+}
+
+/* ============================================================
+   Instalador: gera o javascript: a partir da função acima.
+   ============================================================ */
+(function () {
+  const minify = s => s.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('//')).join('\n');
+  const SRC = wishlistPro.toString();
+  const url = 'javascript:' + encodeURIComponent('(' + minify(SRC) + ')();');
+
+  const bm = document.getElementById('bm');
+  bm.setAttribute('href', url);
+  document.getElementById('src').textContent = SRC;
+  document.getElementById('size').textContent = 'Tamanho do favorito: ' + (url.length / 1024).toFixed(1) + ' KB';
+
+  const toast = document.getElementById('toast');
+  let tt;
+  const say = msg => {
+    toast.textContent = msg;
+    toast.classList.add('on');
+    clearTimeout(tt);
+    tt = setTimeout(() => toast.classList.remove('on'), 2600);
+  };
+
+  bm.addEventListener('click', e => {
+    e.preventDefault();
+    say('Arraste este botão até a barra de favoritos. Clicar aqui não faz nada.');
+  });
+
+  document.getElementById('copy').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(url); say('Código copiado.'); }
+    catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = url;
+      document.body.appendChild(ta);
+      ta.select();
+      let ok = false;
+      try { ok = document.execCommand('copy'); } catch (_) { }
+      ta.remove();
+      say(ok ? 'Código copiado.' : 'Não foi possível copiar. Arraste o botão laranja.');
+    }
+  });
+})();
+</script>
 </body>
 </html>
